@@ -70,12 +70,10 @@ def get_Cm_alpha(va,q,dphr,P,alpha,nb,ms):
 ms=[-0.1,0,0.2,1]
 
 
-alpha, Cm = get_Cm_alpha(va,0,0,avion,interv_alpha,100,ms[0])
-alpha, Cm1 = get_Cm_alpha(va,0,0,avion,interv_alpha,100,ms[1])
-alpha, Cm2 = get_Cm_alpha(va,0,0,avion,interv_alpha,100,ms[2])
-alpha, Cm3 = get_Cm_alpha(va,0,0,avion,interv_alpha,100,ms[3])
+for i in range(4):
+    alpha, vars()['{0}{1}'.format('Cm', i)] = get_Cm_alpha(va,0,0,avion,interv_alpha,100,ms[i])
 
-plt.plot(alpha,Cm,label = "ms=-0.1")
+plt.plot(alpha,Cm0,label = "ms=-0.1")
 plt.plot(alpha,Cm1,label = "ms=0")
 plt.plot(alpha,Cm2,label = "ms=0.2")
 plt.plot(alpha,Cm3,label = "ms=1")
@@ -90,16 +88,25 @@ plt.show()
 
 def dpha_alpha(va,q,P,alpha,nb,ms):
     angle_alpha = np.linspace(alpha[0], alpha[1], nb)
+    P.set_mass_and_static_margin(P.m_k, ms)
     dphr = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q )/ P.Cmd  for k in angle_alpha])
     return angle_alpha, dphr
 
+def dpha_vt(va,q,P,alpha,nb,ms,coeff):
+    angle_alpha = np.linspace(alpha[0], alpha[1], nb)
+    P.set_mass_and_static_margin(P.m_k, ms)
+    dphr = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q )/ (P.Cmd*coeff)  for k in angle_alpha])
+    return angle_alpha, dphr
 
-alpha, dphr = dpha_alpha(va,0,avion,interv_alpha,100,ms[0])
-alpha, dphr1 = dpha_alpha(va,0,avion,interv_alpha,100,ms[1])
-alpha, dphr2 = dpha_alpha(va,0,avion,interv_alpha,100,ms[2])
-alpha, dphr3 = dpha_alpha(va,0,avion,interv_alpha,100,ms[3])
+coeff = [0.9,1,1.1]
+for i in range(len(coeff)):
+    alpha, vars()['{0}{1}'.format('vt', i)] = dpha_vt(va, 0, avion, interv_alpha, 100, ms[0],coeff[i])
 
-plt.plot(alpha,dphr,label = "ms=-0.1")
+
+for i in range(4):
+    alpha, vars()['{0}{1}'.format('dphr', i)] = dpha_alpha(va,0,avion,interv_alpha,100,ms[i])
+
+plt.plot(alpha,dphr0,label = "ms=-0.1")
 plt.plot(alpha,dphr1,label = "ms=0")
 plt.plot(alpha,dphr2,label = "ms=0.2")
 plt.plot(alpha,dphr3,label = "ms=1")
@@ -109,6 +116,17 @@ plt.ylabel("dphr")
 plt.title("dphr en fonction \n d'alpha ")
 plt.legend()
 plt.show()
+
+plt.plot(alpha,vt0,label = "vt=-0.1")
+plt.plot(alpha,vt1,label = "vt=0")
+plt.plot(alpha,vt2,label = "vt=0.2")
+
+plt.xlabel("Alpha en radian")
+plt.ylabel("dphr")
+plt.title("dphr en fonction \n d'alpha ")
+plt.legend()
+plt.show()
+
 
 
 #je sais pas pour vt, proportionnel
@@ -120,10 +138,10 @@ def CLE_alpha(va,q,P,alpha,nb,ms):
     CLE = np.array([dynamic.get_aero_coefs(va, alpha, q, dphr[i], P)[0] for i,alpha in enumerate(angle_alpha)])
     return angle_alpha, CLE
 
-alpha, CLE = CLE_alpha(va,0,avion,interv_alpha,100,ms[2])
+alpha, CLE0 = CLE_alpha(va,0,avion,interv_alpha,100,ms[2])
 alpha, CLE1 = CLE_alpha(va,0,avion,interv_alpha,100,ms[3])
 
-plt.plot(alpha,CLE,label = "ms=0.2")
+plt.plot(alpha,CLE0,label = "ms=0.2")
 plt.plot(alpha,CLE1,label = "ms=1")
 
 plt.xlabel("Alpha en radian")
@@ -141,14 +159,14 @@ def polaire(avion,ms,q=0,va=100,alpha=interv_alpha,):
     CD = np.array([avion.CD0 + avion.ki * CL ** 2 for CL in CLE])
     return CLE,CD
 
-CD,CLE = polaire(avion,ms[2])
-CD,CLE = polaire(avion,ms[3])
+CD,CLE0 = polaire(avion,ms[2])
+CD,CLE1 = polaire(avion,ms[3])
 
-plt.plot(CLE,CD,label = "ms=0.2")
-plt.plot(CLE,CD,label = "ms=1")
+plt.plot(CLE0,CD,label = "ms=0.2")
+plt.plot(CLE1,CD,label = "ms=1")
 
 plt.xlabel("CD")
 plt.ylabel("CL")
-plt.title("polaire ")
+plt.title("polaire")
 plt.legend()
 plt.show()
