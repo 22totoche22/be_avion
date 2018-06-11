@@ -4,169 +4,149 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+''''''''''''
 
-avion = dynamic.Param_A321()
-rho0 = utils.isa(0)[1]
-
+avion = dynamic.Param_A321() #avion choisi
+rho0 = utils.isa(0)[1] #rho0
+nb_points = 100 #nombre de points pour les courbes
+q=0 #angle de braquage de l'empennage horozontal en rad
 
 ''''''''''''
 
-def get_propulsion_M(h,m,nb): # altitude h(m), m is an interval for the mach, nb number of points
+def get_propulsion_M(h,m,nb): #calcule la poussée maximale en focntion du nombre de mach, (altitude m, intervalle pour le mach, nombre de points)
     rho = utils.isa(h)[1]
     M = np.linspace(m[0], m[1], nb)
     F = np.array([avion.F0*math.pow(rho/rho0, 0.6)*(0.568+0.25*math.pow(1.2-mach, 3)) for mach in M])
     return F,M
 
+interv_M = [0.4,0.9] #intervalle du mach
+h = [3000, 10000] #altitude en m
 
-interv_M = [0.4,0.9]
-h1 = 3000
-h2 = 10000
-
-F1,M = get_propulsion_M(h1,interv_M,100)
-F2,M = get_propulsion_M(h2,interv_M,100)
-
-plt.plot(M,F1,label = "h=3000m")
-plt.plot(M,F2,label = "h=10000m")
-
-plt.xlabel("Mach")
-plt.ylabel("Poussee maximale en N")
-plt.title("Poussee maximale en fonction \n du nombre de mach ")
-plt.legend()
+prop = plt.figure()
+for i in h:
+    F,M = get_propulsion_M(i,interv_M,nb_points)
+    plt.plot(M,F,label = "h="+str(i)+"m",figure=prop)
+    plt.xlabel("Mach")
+    plt.ylabel("Poussee maximale en N")
+    plt.title("Poussee maximale en fonction \n du nombre de mach ")
+    plt.legend()
 plt.show()
-
-
-
 
 ''''''''''''''''''
-va = 100
+va = 100 #vitesse de l'avion en m/s
 
-def get_CL_alpha(va,q,dphr,P,alpha,nb):
+def get_CL_alpha(va,q,dphr,P,alpha,nb): # calcule CL en fonction de l'angle d'incidence alpha , (vitesse m/s,vitesse de tangage rad/sec, angle de braquage de l'empennage horozontal en rad, intervalle d'incidnce alpha  rad, nombre de points)
     angle_alpha = np.linspace(alpha[0],alpha[1],nb)
     CL = np.array([dynamic.get_aero_coefs(va, alpha, q, dphr, P)[0] for alpha in angle_alpha])
-    return angle_alpha, CL
+    return utils.deg_of_rad(angle_alpha), CL #angle_alpha en degré
 
+interv_alpha = [-10*math.pi/180,20*math.pi/180] #intervalle d'incidence alpha en rad
+dphr = [-30*math.pi/180,+20*math.pi/180] #valeurs de dphr en rad
 
-interv_alpha = [-10*math.pi/180,20*math.pi/180]
-
-alpha, CL = get_CL_alpha(va,0,-30*math.pi/180,avion,interv_alpha,100)
-alpha, CL1 = get_CL_alpha(va,0,+20*math.pi/180,avion,interv_alpha,100)
-
-plt.plot(alpha,CL,label = "dphr=-30*math.pi/180 rad")
-plt.plot(alpha,CL1,label = "dphr=+20*math.pi/180 rad")
-
-plt.xlabel("Alpha en radian")
-plt.ylabel("CL")
-plt.title("CL en fonction \n d'alpha ")
-plt.legend()
+cl = plt.figure()
+for i in dphr:
+    alpha, CL = get_CL_alpha(va,q,i,avion,interv_alpha,nb_points)
+    plt.plot(alpha,CL,label = "dphr="+str(utils.deg_of_rad(i))+" degre",figure=cl)
+    plt.xlabel("Angle d'incidence alpha en degre")
+    plt.ylabel("Coefficient de portance CL")
+    plt.title("CL en fonction \n d'alpha ")
+    plt.legend()
 plt.show()
 
 ''''''''
 
-def get_Cm_alpha(va,q,dphr,P,alpha,nb,ms):
+def get_Cm_alpha(va,q,dphr,P,alpha,nb,ms): # calcule Cm en fonction de l'angle d'incidence alpha, (vitesse m/s, vitesse de tangage rad/sec, angle de braquage de l'empennage horizontal en rad, intervalle d'incidnce alpha  rad, nombre de points)
     angle_alpha = np.linspace(alpha[0], alpha[1], nb)
     Cm = np.array([ P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q + P.Cmd * dphr for k in angle_alpha])
-    return angle_alpha, Cm
+    return utils.deg_of_rad(angle_alpha), Cm #angle alpha en degré
 
-ms=[-0.1,0,0.2,1]
+ms=[-0.1,0,0.2,1] #valeurs de marge statique
+dphr0 = 0
 
-
-for i in range(4):
-    alpha, vars()['{0}{1}'.format('Cm', i)] = get_Cm_alpha(va,0,0,avion,interv_alpha,100,ms[i])
-
-plt.plot(alpha,Cm0,label = "ms=-0.1")
-plt.plot(alpha,Cm1,label = "ms=0")
-plt.plot(alpha,Cm2,label = "ms=0.2")
-plt.plot(alpha,Cm3,label = "ms=1")
-
-plt.xlabel("Alpha en radian")
-plt.ylabel("Cm")
-plt.title("Cm en fonction \n d'alpha ")
-plt.legend()
+cm = plt.figure()
+for i in ms:
+    alpha, Cm = get_Cm_alpha(va,q,dphr0,avion,interv_alpha,nb_points,i)
+    plt.plot(alpha,Cm,label = "ms="+str(i)+"",figure=cm)
+    plt.xlabel("Angle d'incidence alpha en degre")
+    plt.ylabel("Coefficient du moment de tangage Cm")
+    plt.title("Cm en fonction \n d'alpha ")
+    plt.legend()
 plt.show()
 
 ''''''''
+qe =0 #vol stabilié
+Cme =0 #  moment de tangage nul
 
-def dpha_alpha(va,q,P,alpha,nb,ms):
+def dphre_alpha(va,q,P,alpha,nb,ms): #dphre en fonction de de l'incidence alpha e ,(idem que precedemment)
     angle_alpha = np.linspace(alpha[0], alpha[1], nb)
     P.set_mass_and_static_margin(P.m_k, ms)
-    dphr = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q )/ P.Cmd  for k in angle_alpha])
-    return angle_alpha, dphr
+    dphre = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q )/ P.Cmd  for k in angle_alpha])
+    return utils.deg_of_rad(angle_alpha), utils.deg_of_rad(dphre) #angle alpha et dphre en degré
 
-def dpha_vt(va,q,P,alpha,nb,ms,coeff):
-    angle_alpha = np.linspace(alpha[0], alpha[1], nb)
-    P.set_mass_and_static_margin(P.m_k, ms)
-    dphr = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q )/ (P.Cmd*coeff)  for k in angle_alpha])
-    return angle_alpha, dphr
-
-coeff = [0.9,1,1.1]
-for i in range(len(coeff)):
-    alpha, vars()['{0}{1}'.format('vt', i)] = dpha_vt(va, 0, avion, interv_alpha, 100, ms[0],coeff[i])
-
-
-for i in range(4):
-    alpha, vars()['{0}{1}'.format('dphr', i)] = dpha_alpha(va,0,avion,interv_alpha,100,ms[i])
-
-plt.plot(alpha,dphr0,label = "ms=-0.1")
-plt.plot(alpha,dphr1,label = "ms=0")
-plt.plot(alpha,dphr2,label = "ms=0.2")
-plt.plot(alpha,dphr3,label = "ms=1")
-
-plt.xlabel("Alpha en radian")
-plt.ylabel("dphr")
-plt.title("dphr en fonction \n d'alpha ")
-plt.legend()
-plt.show()
-
-plt.plot(alpha,vt0,label = "vt=-0.1")
-plt.plot(alpha,vt1,label = "vt=0")
-plt.plot(alpha,vt2,label = "vt=0.2")
-
-plt.xlabel("Alpha en radian")
-plt.ylabel("dphr")
-plt.title("dphr en fonction \n d'alpha ")
-plt.legend()
+dphrealpha = plt.figure()
+for i in ms:
+    alpha,dphre = dphre_alpha(va, qe, avion, interv_alpha, nb_points, i)
+    plt.plot(alpha,dphre,label = "ms="+str(i)+"",figure=dphrealpha)
+    plt.xlabel("Angle d'incidence alpha en degre")
+    plt.ylabel("angle de braquage de l'empennage horizontal dphre en degre")
+    plt.title("dphre en fonction \n d'alpha pour vitesse de tangage q=0 et moment de tangage Cm=0")
+    plt.legend()
 plt.show()
 
 
+coeff_vt = [0.9,1,1.1] #coefficient pour volume d'empennage Vt
 
-#je sais pas pour vt, proportionnel
+def dphre_vt(va,q,P,alpha,nb,ms,coeff): #dphre en fonction de de l'incidence alpha e ,(idem que precedemment, coefficient pour volume d'empennage Vt)
+    angle_alpha = np.linspace(alpha[0], alpha[1], nb)
+    P.set_mass_and_static_margin(P.m_k, ms)
+    dphre= np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q )/ (P.Cmd*coeff)  for k in angle_alpha])
+    return utils.deg_of_rad(angle_alpha), utils.deg_of_rad(dphre) #angle alpha et dphre en degré
+
+dphrevt = plt.figure()
+ms_vt = ms[2]
+for i in coeff_vt:
+    alpha, dphre = dphre_vt(va, qe, avion, interv_alpha, nb_points, ms_vt,i)
+    plt.plot(alpha,dphre,label = "vt="+str(-avion.Cmd*i/avion.CLat)+"",figure=dphrevt)
+    plt.xlabel("Angle d'incidence alpha en degre")
+    plt.ylabel("angle de braquage de l'empennage horizontal dphre en degre")
+    plt.title("dphre en fonction \n d'alpha pour ms ="+str(ms_vt)+"")
+    plt.legend()
+plt.show()
+
 ''''''''''''
 
-def CLE_alpha(va,q,P,alpha,nb,ms):
+def CLE_alpha(va,q,P,alpha,nb,ms): #coefficident de portance equilibrée Cle lorsque dphr=dphre, (idem)
     angle_alpha = np.linspace(alpha[0],alpha[1],nb)
     dphr = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q) / P.Cmd for k in angle_alpha])
     CLE = np.array([dynamic.get_aero_coefs(va, alpha, q, dphr[i], P)[0] for i,alpha in enumerate(angle_alpha)])
-    return angle_alpha, CLE
+    return utils.deg_of_rad(angle_alpha), CLE
 
-alpha, CLE0 = CLE_alpha(va,0,avion,interv_alpha,100,ms[2])
-alpha, CLE1 = CLE_alpha(va,0,avion,interv_alpha,100,ms[3])
-
-plt.plot(alpha,CLE0,label = "ms=0.2")
-plt.plot(alpha,CLE1,label = "ms=1")
-
-plt.xlabel("Alpha en radian")
-plt.ylabel("CLE")
-plt.title("CLE en fonction \n d'alpha ")
-plt.legend()
+clealpha = plt.figure()
+for i in range(2,len(ms)):
+    alpha, CLE = CLE_alpha(va,qe,avion,interv_alpha,nb_points,ms[i])
+    plt.plot(alpha,CLE,label = "ms="+str(ms[i])+"",figure=clealpha)
+    plt.xlabel("Angle d'incidence alpha en degre")
+    plt.ylabel("Coefficient de portance equilibree CLE")
+    plt.title("CLE en fonction \n d'alpha ")
+    plt.legend()
 plt.show()
 
 ''''''''''''
 
+def polaire(avion,ms,qe,va,alpha,nb): #polaire, idem
+    CLE = CLE_alpha(va,qe,avion,alpha,nb,ms)[1]
+    CDE = np.array([avion.CD0 + avion.ki * CL ** 2 for CL in CLE])
+    return CLE,CDE
 
-def polaire(avion,ms,q=0,va=100,alpha=interv_alpha,):
-
-    CLE = CLE_alpha(va,q,avion,alpha,100,ms)[1]
-    CD = np.array([avion.CD0 + avion.ki * CL ** 2 for CL in CLE])
-    return CLE,CD
-
-CD,CLE0 = polaire(avion,ms[2])
-CD,CLE1 = polaire(avion,ms[3])
-
-plt.plot(CLE0,CD,label = "ms=0.2")
-plt.plot(CLE1,CD,label = "ms=1")
-
-plt.xlabel("CD")
-plt.ylabel("CL")
-plt.title("polaire")
-plt.legend()
+polair=plt.figure()
+for i in range(2,len(ms)):
+    CLE,CDE = polaire(avion,ms[i],qe,va,interv_alpha,nb_points)
+    plt.plot(CDE,CLE,label = "ms="+str(ms[i])+"",figure=polair)
+    plt.xlabel("CDe")
+    plt.ylabel("CLe")
+    plt.title("Polaire equilibree")
+    plt.legend()
 plt.show()
+
+fmax = max(CLE / CDE)
+print ("finesse_max :"+str(fmax))
