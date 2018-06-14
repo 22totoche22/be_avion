@@ -96,13 +96,13 @@ def CLE_alpha(va,q,P,alpha,nb,ms):
     angle_alpha = np.linspace(interv_alpha[0],interv_alpha[1],nb)
     dphr = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q) / P.Cmd for k in angle_alpha])
     CLE = np.array([dynamic.get_aero_coefs(va, alpha, q, dphr[i], P)[0] for i,alpha in enumerate(angle_alpha)])
-    return angle_alpha, CLE
+    return utils.deg_of_rad(angle_alpha), CLE
 
 alpha, CLE = CLE_alpha(va_trim,0,avion,interv_alpha,100,ms_trim)
 
 
 alphatrim_0 = valeur_trim[0]
-alphatrim_0 = float(int(alphatrim_0*1000 + 0.5))/1000
+alphatrim_0 = float(int(utils.deg_of_rad(alphatrim_0*1000 + 0.5))/1000)
 Cl = float(int(Cl*1000 +0.5))/1000
 
 plt.plot(alpha,CLE,label = "ms = "+str(ms_trim))
@@ -120,11 +120,11 @@ colonne_alphatrim = [alphatrim_0]*2
 plt.plot(x, ligne_cl[:idx], '--', color = 'red')
 plt.plot(colonne_alpha, y, '--', color = 'red')
 plt.plot(colonne_alphatrim, [CLE[0], CLE[nb-1]], '--', color = 'red')
-plt.annotate("alphae = "+str(alpha[idx]), xy = (alpha[idx], CLE[0]), xytext = (0.175, -0.5),
+plt.annotate("alphae = "+str(alpha[idx]), xy = (alpha[idx], CLE[0]), xytext = (utils.deg_of_rad(0.175), -0.5),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
-plt.annotate("cl = "+str(Cl), xy = (alpha[0], Cl), xytext = (-0.1, 1.0),
+plt.annotate("cl = "+str(Cl), xy = (alpha[0], Cl), xytext = (utils.deg_of_rad(-0.1), 1.0),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
-plt.annotate("alpha = "+str(alphatrim_0), xy = (valeur_trim[0], CLE[0]), xytext = (-0.1, -0.5),
+plt.annotate("alpha = "+str(alphatrim_0), xy = (utils.deg_of_rad(valeur_trim[0]), CLE[0]), xytext = (utils.deg_of_rad(-0.1), -0.5),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
 plt.xlim(alpha[0], alpha[nb-1])
 plt.ylim(CLE[0], CLE[nb-1])
@@ -136,13 +136,13 @@ def dpha_alpha(va,q,P,alpha,nb,ms):
     angle_alpha = np.linspace(alpha[0], alpha[1], nb)
     P.set_mass_and_static_margin(P.m_k, ms)
     dphr = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q )/ P.Cmd  for k in angle_alpha])
-    return angle_alpha, dphr
+    return utils.deg_of_rad(angle_alpha), utils.deg_of_rad(dphr)
 
 alpha, dphr = dpha_alpha(va_trim, 0, avion, interv_alpha, 100, ms_trim)
 
 
 dphrtrim_1 = valeur_trim[1]
-dphrtrim_1 = float(int(dphrtrim_1*1000 + 0.5))/1000
+dphrtrim_1 = float(int(utils.deg_of_rad(dphrtrim_1*1000 + 0.5)))/1000
 
 
 plt.plot(alpha, dphr, label = "ms = "+str(ms))
@@ -156,11 +156,11 @@ alpha[idx] = float(int(alpha[idx]*1000 + 0.5))/1000
 plt.plot(colonne_alphatrim, [dphr[0], valeur_trim[1]], '--', color = 'red')
 plt.plot(x, ligne_dphr, '--', color = 'red')
 plt.plot(alpha, ligne_dphrtrim, '--', color = 'red')
-plt.annotate("dphr = "+str(dphrtrim_1), xy = (alpha[0], valeur_trim[1]), xytext = (-0.1, -0.1),
+plt.annotate("dphr = "+str(dphrtrim_1), xy = (alpha[0], dphrtrim_1), xytext = (utils.deg_of_rad(-0.1), utils.deg_of_rad(-0.08)),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
-plt.annotate("dphre = "+str(dphr[idx]), xy = (alpha[0], dphr[idx]), xytext = (-0.1, -0.08),
+plt.annotate("dphre = "+str(dphr[idx]), xy = (alpha[0], dphr[idx]), xytext = (utils.deg_of_rad(-0.1), utils.deg_of_rad(-0.1)),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
-plt.annotate("alphae = "+str(alpha[idx]), xy = (alpha[idx], dphr[0]), xytext = (0.2, -0.12),
+plt.annotate("alphae = "+str(alpha[idx]), xy = (alpha[idx], dphr[0]), xytext = (utils.deg_of_rad(0.2), utils.deg_of_rad(-0.12)),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
 plt.xlim(alpha[0], alpha[nb-1])
 plt.ylim(dphr[0], dphr[nb-1])
