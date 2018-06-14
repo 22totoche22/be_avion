@@ -62,8 +62,8 @@ def affiche():
                         plt.legend()
                         plt.subplot(1, 4, 3)
                         plt.title("dth")
-                        plt.plot(h1, utils.deg_of_rad(dthtrim[i, j, k, :]), label = "Mach = "+str(Ma[k])+"")
-                        plt.ylabel('dth en degre')
+                        plt.plot(h1, dthtrim[i, j, k, :], label = "Mach = "+str(Ma[k])+"")
+                        plt.ylabel('dth')
                         plt.xlabel('altitude')
                         plt.legend()
             for l in range(len(h)):
