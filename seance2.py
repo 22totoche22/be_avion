@@ -52,25 +52,25 @@ def affiche():
                         plt.title("alpha")
                         plt.plot(h1,utils.deg_of_rad(alphatrim[i,j,k,:]),label = "Mach = "+str(Ma[k])+"")
                         plt.ylabel('alpha en degre')
-                        plt.xlabel('altitude')
+                        plt.xlabel('altitude en m')
                         plt.legend()
                         plt.subplot(1, 4, 2)
                         plt.title("dphr")
                         plt.plot(h1, utils.deg_of_rad(dphrtrim[i, j, k, :]), label = "Mach = "+str(Ma[k])+"")
                         plt.ylabel('dphr en degre')
-                        plt.xlabel('altitude')
+                        plt.xlabel('altitude en m')
                         plt.legend()
                         plt.subplot(1, 4, 3)
                         plt.title("dth")
                         plt.plot(h1, dthtrim[i, j, k, :], label = "Mach = "+str(Ma[k])+"")
                         plt.ylabel('dth')
-                        plt.xlabel('altitude')
+                        plt.xlabel('altitude en m')
                         plt.legend()
             for l in range(len(h)):
                         plt.subplot(1, 4, 4)
                         plt.title("poussee")
                         plt.plot(Ma1, prop[i, j,: ,l ], label="altitude = " + str(h[l]) + "")
-                        plt.ylabel('poussee')
+                        plt.ylabel('poussee en N')
                         plt.xlabel('Mach')
                         plt.legend()
             plt.show()
@@ -106,7 +106,7 @@ alphatrim_0 = float(int(utils.deg_of_rad(alphatrim_0*1000 + 0.5))/1000)
 Cl = float(int(Cl*1000 +0.5))/1000
 
 plt.plot(alpha,CLE,label = "ms = "+str(ms_trim))
-plt.xlabel("Alpha (rad)")
+plt.xlabel("Alpha (deg)")
 plt.ylabel("CLE")
 plt.title("CLE en fonction \n d'alpha ")
 ligne_cl = [Cl]*nb
@@ -146,8 +146,8 @@ dphrtrim_1 = float(int(utils.deg_of_rad(dphrtrim_1*1000 + 0.5)))/1000
 
 
 plt.plot(alpha, dphr, label = "ms = "+str(ms))
-plt.xlabel("alpha (rad)")
-plt.ylabel("dphr (rad)")
+plt.xlabel("alpha (deg)")
+plt.ylabel("dphr (deg)")
 plt.title("dphr en fonction \n d'alpha")
 ligne_dphr = [dphr[idx]]*idx
 dphr[idx] = float(int(dphr[idx]*1000 + 0.5))/1000
