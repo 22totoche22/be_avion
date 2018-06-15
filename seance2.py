@@ -105,8 +105,8 @@ alphatrim_0 = valeur_trim[0]
 alphatrim_0 = float(int(utils.deg_of_rad(alphatrim_0*1000 + 0.5))/1000)
 Cl = float(int(Cl*1000 +0.5))/1000
 
-plt.plot(alpha,CLE,label = "ms = "+str(ms_trim))
-plt.xlabel("Alpha (deg)")
+plt.plot(alpha,CLE,label = "ms = "+str(ms_trim)+" ,km = "+str(km_trim)+" ,Ma = "+str(Ma_trim))
+plt.xlabel("Alphae (deg)")
 plt.ylabel("CLE")
 plt.title("CLE en fonction \n d'alpha ")
 ligne_cl = [Cl]*nb
@@ -122,10 +122,10 @@ plt.plot(colonne_alpha, y, '--', color = 'red')
 plt.plot(colonne_alphatrim, [CLE[0], CLE[nb-1]], '--', color = 'red')
 plt.annotate("alphae = "+str(alpha[idx]), xy = (alpha[idx], CLE[0]), xytext = (utils.deg_of_rad(0.175), -0.5),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
-plt.annotate("cl = "+str(Cl), xy = (alpha[0], Cl), xytext = (utils.deg_of_rad(-0.1), 1.0),
+plt.annotate("cle = "+str(Cl), xy = (alpha[0], Cl), xytext = (utils.deg_of_rad(-0.1), 1.0),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
 plt.annotate("alpha = "+str(alphatrim_0), xy = (utils.deg_of_rad(valeur_trim[0]), CLE[0]), xytext = (utils.deg_of_rad(-0.1), -0.5),
-             arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
+             arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'black')
 plt.xlim(alpha[0], alpha[nb-1])
 plt.ylim(CLE[0], CLE[nb-1])
 plt.legend()
@@ -145,9 +145,9 @@ dphrtrim_1 = valeur_trim[1]
 dphrtrim_1 = float(int(utils.deg_of_rad(dphrtrim_1*1000 + 0.5)))/1000
 
 
-plt.plot(alpha, dphr, label = "ms = "+str(ms))
-plt.xlabel("alpha (deg)")
-plt.ylabel("dphr (deg)")
+plt.plot(alpha, dphr, label = "ms = "+str(ms_trim)+" ,km = "+str(km_trim)+" ,Ma = "+str(Ma_trim))
+plt.xlabel("alphae (deg)")
+plt.ylabel("dphre (deg)")
 plt.title("dphr en fonction \n d'alpha")
 ligne_dphr = [dphr[idx]]*idx
 dphr[idx] = float(int(dphr[idx]*1000 + 0.5))/1000
@@ -157,7 +157,7 @@ plt.plot(colonne_alphatrim, [dphr[0], valeur_trim[1]], '--', color = 'red')
 plt.plot(x, ligne_dphr, '--', color = 'red')
 plt.plot(alpha, ligne_dphrtrim, '--', color = 'red')
 plt.annotate("dphr = "+str(dphrtrim_1), xy = (alpha[0], dphrtrim_1), xytext = (utils.deg_of_rad(-0.1), utils.deg_of_rad(-0.08)),
-             arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
+             arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'black')
 plt.annotate("dphre = "+str(dphr[idx]), xy = (alpha[0], dphr[idx]), xytext = (utils.deg_of_rad(-0.1), utils.deg_of_rad(-0.1)),
              arrowprops = {"facecolor" : "black", "width" : 0, "headwidth" : 7}, color = 'red')
 plt.annotate("alphae = "+str(alpha[idx]), xy = (alpha[idx], dphr[0]), xytext = (utils.deg_of_rad(0.2), utils.deg_of_rad(-0.12)),
@@ -166,6 +166,28 @@ plt.xlim(alpha[0], alpha[nb-1])
 plt.ylim(dphr[0], dphr[nb-1])
 plt.legend()
 plt.show()
+
+def CLE_alpha(va,q,P,alpha,nb,ms): #coefficident de portance equilibrée Cle lorsque dphr=dphre, (idem)
+    angle_alpha = np.linspace(alpha[0],alpha[1],nb)
+    dphr = np.array([-(P.Cm0 - ms * P.CLa * (k - P.a0) + P.Cmq * P.lt / va * q) / P.Cmd for k in angle_alpha])
+    CLE = np.array([dynamic.get_aero_coefs(va, alpha, q, dphr[i], P)[0] for i,alpha in enumerate(angle_alpha)])
+    return utils.deg_of_rad(angle_alpha), CLE
+
+def polaire(avion,ms,qe,va,alpha,nb): #polaire, idem
+    CLE = CLE_alpha(va,qe,avion,alpha,nb,ms)[1]
+    CDE = np.array([avion.CD0 + avion.ki * CL ** 2 for CL in CLE])
+    return CLE,CDE
+
+
+nb_points = 100 #nombre de points pour les courbes
+qe=0
+va = 100 #vitesse de l'avion en m/s
+interv_alpha = [-10*math.pi/180,20*math.pi/180] #intervalle d'incidence alpha en rad
+CLE,CDE = polaire(avion,ms_trim,qe,va,interv_alpha,nb_points)
+fmax = max(CLE / CDE)
+dth = (avion.m*avion.g/fmax)/(avion.F0*math.pow(rho_trim/rho0, 0.6)*(0.568+0.25*math.pow(1.2-Ma_trim, 3)))
+
+
 #
 # #mvgammapoint = L-mgcos(gamma) Fsin(alpha) est négligé
 # #L=mgcos(gamma)=mg
@@ -174,7 +196,7 @@ plt.show()
 ''''''''''''''''''
 
 #simule la trajectoire de l'avion sur 100 secondes
-avion.set_mass_and_static_margin(km[0],ms[0])
+avion.set_mass_and_static_margin(point_trim[3],point_trim[2])
 va_trim = dynamic.va_of_mach(Ma_trim,h_trim)
 X_trim, U_trim = dynamic.trim(avion, {'va':va_trim, 'gamm':0, 'h':h_trim})
 time=np.array([i for i in range(1,100)])
