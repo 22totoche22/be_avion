@@ -84,12 +84,10 @@ def decorate_plot(plt, x, y, rows, columns, xy, xytext, annotations):
 
     for i in range(len(rows)):
         row_i = rows[i]
-        print(i)
         nb_points_i = len(row_i)
         plt.plot(x[:nb_points_i], row_i, '--', color = 'red')
 
     for j in range(len(columns)):
-        print(j)
         column_j = columns[j]
         nb_points_j = len(column_j)
         plt.plot(column_j, y[:nb_points_j], '--', color = 'red')
@@ -140,44 +138,44 @@ def affiche_vp():
     for kb, k in enumerate(Ma):
         for ib,i in enumerate(ms):
             for jb,j in enumerate(km):
-                    vp_Va = valeurspropres[:,nb2 * kb - 1, nb2 * ib - 1, nb2 * jb - 1, 0]
-                    vp_a = valeurspropres[:, nb2 * kb - 1, nb2 * ib - 1, nb2 * jb - 1, 1]
-                    vp_theta = valeurspropres[:, nb2 * kb - 1, nb2 * ib - 1, nb2 * jb - 1, 2]
-                    vp_q = valeurspropres[:, nb2 * kb - 1, nb2 * ib - 1, nb2 * jb - 1, 3]
-                    decorate(vp_Va, vp_a, vp_theta, vp_q,ss, nomb,'Ma={}, ms={}, km={}'.format(kb,ib,jb),[h[0], h[1]],'h')
+                    vp_Va = valeurspropres[:,kb*(nb2-1), ib*(nb2-1), jb*(nb2-1) , 0]
+                    vp_a = valeurspropres[:, kb*(nb2-1) , ib*(nb2-1) , jb*(nb2-1) , 1]
+                    vp_theta = valeurspropres[:, kb*(nb2-1), ib*(nb2-1), jb*(nb2-1), 2]
+                    vp_q = valeurspropres[:, kb*(nb2-1) , ib*(nb2-1) , jb*(nb2-1), 3]
+                    decorate(vp_Va, vp_a, vp_theta, vp_q,ss, nomb,'Ma={}, ms={}, km={}'.format(k,i,j),[h[0], h[1]],'h')
                     ss+=1
     plt.show()
     ss=1
     for kb, k in enumerate(Ma):
         for ib,i in enumerate(ms):
             for lb, l in enumerate(h):
-                vp_Va = valeurspropres[nb2 * lb -1, nb2 * kb - 1, nb2 * ib - 1, :, 0]
-                vp_a = valeurspropres[nb2 * lb -1, nb2 * kb - 1, nb2 * ib - 1, :, 1]
-                vp_theta = valeurspropres[nb2 * lb -1, nb2 * kb - 1, nb2 * ib - 1, :, 2]
-                vp_q = valeurspropres[nb2 * lb -1, nb2 * kb - 1, nb2 * ib - 1, :, 3]
-                decorate(vp_Va, vp_a, vp_theta, vp_q, ss, nomb, 'Ma={}, ms={}, h={}'.format(kb, ib, lb), [km[0], km[1]],'km')
+                vp_Va = valeurspropres[lb*(nb2-1), kb*(nb2-1), ib *(nb2-1), :, 0]
+                vp_a = valeurspropres[lb*(nb2-1), kb*(nb2-1), ib*(nb2-1) , :, 1]
+                vp_theta = valeurspropres[lb*(nb2-1), kb*(nb2-1) , ib*(nb2-1) , :, 2]
+                vp_q = valeurspropres[lb*(nb2-1), kb*(nb2-1), ib*(nb2-1) , :, 3]
+                decorate(vp_Va, vp_a, vp_theta, vp_q, ss, nomb, 'Ma={}, ms={}, h={}'.format(k, i, l), [km[0], km[1]],'km')
                 ss += 1
     plt.show()
     ss=1
     for kb, k in enumerate(Ma):
         for lb, l in enumerate(h):
             for jb,j in enumerate(km):
-                vp_Va = valeurspropres[nb2 * lb -1, nb2 * kb - 1, :, nb2 * jb - 1, 0]
-                vp_a = valeurspropres[nb2 * lb -1, nb2 * kb - 1, :, nb2 * jb - 1, 1]
-                vp_theta = valeurspropres[nb2 * lb -1, nb2 * kb - 1, :, nb2 * jb - 1, 2]
-                vp_q = valeurspropres[nb2 * lb -1, nb2 * kb - 1, :, nb2 * jb - 1, 3]
-                decorate(vp_Va, vp_a, vp_theta, vp_q, ss, nomb, 'Ma={}, h={}, km={}'.format(kb, lb, jb), [ms[0], ms[1]],'ms')
+                vp_Va = valeurspropres[lb*(nb2-1), kb*(nb2-1) , :, jb*(nb2-1) , 0]
+                vp_a = valeurspropres[lb*(nb2-1) , kb*(nb2-1) , :, jb*(nb2-1) , 1]
+                vp_theta = valeurspropres[lb*(nb2-1), kb*(nb2-1) , :, jb*(nb2-1) , 2]
+                vp_q = valeurspropres[lb*(nb2-1), kb*(nb2-1) , :, jb*(nb2-1) , 3]
+                decorate(vp_Va, vp_a, vp_theta, vp_q, ss, nomb, 'Ma={}, h={}, km={}'.format(k, l, j), [ms[0], ms[1]],'ms')
                 ss += 1
     plt.show()
     ss=1
     for lb, l in enumerate(h):
         for ib,i in enumerate(ms):
             for jb,j in enumerate(km):
-                vp_Va = valeurspropres[nb2 * lb -1, :, nb2 * ib - 1, nb2 * jb - 1, 0]
-                vp_a = valeurspropres[nb2 * lb -1, :, nb2 * ib - 1, nb2 * jb - 1, 1]
-                vp_theta = valeurspropres[nb2 * lb -1, :, nb2 * ib - 1, nb2 * jb - 1, 2]
-                vp_q = valeurspropres[nb2 * lb -1, :, nb2 * ib - 1, nb2 * jb - 1, 3]
-                decorate(vp_Va, vp_a, vp_theta, vp_q, ss, nomb, 'h={}, ms={}, km={}'.format(lb, ib, jb), [Ma[0], Ma[1]],'Ma')
+                vp_Va = valeurspropres[lb*(nb2-1), :, ib*(nb2-1), jb*(nb2-1), 0]
+                vp_a = valeurspropres[lb*(nb2-1) , :, ib*(nb2-1), jb*(nb2-1), 1]
+                vp_theta = valeurspropres[lb*(nb2-1), :, ib*(nb2-1), jb*(nb2-1), 2]
+                vp_q = valeurspropres[lb*(nb2-1), :, ib*(nb2-1), jb*(nb2-1), 3]
+                decorate(vp_Va, vp_a, vp_theta, vp_q, ss, nomb, 'h={}, ms={}, km={}'.format(l, i, j), [Ma[0], Ma[1]],'Ma')
                 ss += 1
     plt.show()
 
@@ -258,7 +256,7 @@ if __name__ == '__main__':
     # CLE function of alpha
 
     plt = plot(alpha, CLE, "CLE en fonction \n d'alphae",
-               "ms = " + str(ms_trim) + " ,km = " + str(km_trim) + " ,Ma = " + str(Ma_trim), "Alphae (deg)", "CLE",
+               "ms = " + str(ms_trim) + ", km = " + str(km_trim) + ", Ma = " + str(Ma_trim), "Alphae (deg)", "CLE",
                (alpha[0], alpha[nb - 1]), (CLE[0], CLE[nb - 1]))
 
     row_cl = [Cl] * nb
@@ -284,7 +282,7 @@ if __name__ == '__main__':
 
 
     plt = plot(alpha, dphr, "dphr en fonction \n d'alpha",
-               "ms = " + str(ms_trim) + " ,km = " + str(km_trim) + " ,Ma = " + str(Ma_trim), "Alphae (deg)",
+               "ms = " + str(ms_trim) + ", km = " + str(km_trim) + ", Ma = " + str(Ma_trim), "Alphae (deg)",
                "dphre (deg)", (alpha[0], alpha[nb - 1]), (dphr[0], dphr[nb - 1]))
 
     ligne_dphr = [dphr[idx]] * idx
@@ -313,7 +311,8 @@ if __name__ == '__main__':
     fmax = max(CLE / CDE)
     dth = (avion.m * avion.g / fmax) / (
                 avion.F0 * math.pow(rho_trim / rho0, 0.6) * (0.568 + 0.25 * math.pow(1.2 - Ma_trim, 3)))
-
+    print("dthe",dth)
+    print("dth_trim",dthtrim[0,0,0,0])
     ''''''''''''''''''
 
     # question 4
