@@ -226,7 +226,7 @@ if __name__ == '__main__':
                     Xb, Ub = dynamic.trim(avion, {'va': va_h0b, 'gamm': 0., 'h': l})
                     prop[ib, jb, kbb, lbb] = dynamic.propulsion_model(Xb, Ub, avion)
 
-        affiche()
+    affiche()
 
     ''''''''''''''''''
 
@@ -242,17 +242,22 @@ if __name__ == '__main__':
 
     Cl = 2 * avion.m * avion.g / (rho_trim * avion.S * va_trim ** 2)
     interv_alpha = [-10 * math.pi / 180, 20 * math.pi / 180]
+
+
     alpha, CLE = CLE_alpha(va_trim, 0, avion, interv_alpha, 100, ms_trim)
     alphatrim_0 = valeur_trim[0]
     alphatrim_0 = float(int(utils.deg_of_rad(alphatrim_0 * 1000 + 0.5)) / 1000)
     Cl = float(int(Cl * 1000 + 0.5)) / 1000
 
-    alpha, dphr = dpha_alpha(va_trim, 0, avion, interv_alpha, 100, ms_trim)
 
+    alpha, dphr = dpha_alpha(va_trim, 0, avion, interv_alpha, 100, ms_trim)
     dphrtrim_1 = valeur_trim[1]
     dphrtrim_1 = float(int(utils.deg_of_rad(dphrtrim_1 * 1000 + 0.5))) / 1000
 
-    plt = plot(alpha, CLE, "CLE en fonction \n d'alpha",
+
+    # CLE function of alpha
+
+    plt = plot(alpha, CLE, "CLE en fonction \n d'alphae",
                "ms = " + str(ms_trim) + " ,km = " + str(km_trim) + " ,Ma = " + str(Ma_trim), "Alphae (deg)", "CLE",
                (alpha[0], alpha[nb - 1]), (CLE[0], CLE[nb - 1]))
 
@@ -273,6 +278,10 @@ if __name__ == '__main__':
 
     plt = decorate_plot(plt, alpha, CLE, rows, columns, xy, xytext, annotations)
     plt.show()
+
+
+    # dphre function of alpha
+
 
     plt = plot(alpha, dphr, "dphr en fonction \n d'alpha",
                "ms = " + str(ms_trim) + " ,km = " + str(km_trim) + " ,Ma = " + str(Ma_trim), "Alphae (deg)",
