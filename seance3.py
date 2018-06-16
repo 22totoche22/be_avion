@@ -11,7 +11,6 @@ import dynamic as dyn
 import utils as ut
 import scipy.integrate
 
-import pdb
 
 
 
@@ -30,10 +29,7 @@ def points_trim():
     return points
 
 
-
-point_1 = points_trim()[15]
-point_2 = points_trim()[14]
-
+''' Modèle non Linéaire'''
 
 
 def nonLinearModel(aircraft, point_trim, wh, time):
@@ -47,14 +43,12 @@ def nonLinearModel(aircraft, point_trim, wh, time):
     return X
 
 
-
 ''' Modèle linéaire '''
 
 
 def dynlin(dX, t, A, B, dU):
     dxdot = np.dot(A,dX) + np.dot(B,dU)
     return dxdot
-
 
 
 def LinearModel(aircraft, point_trim, wh, time):
@@ -77,27 +71,18 @@ def LinearModel(aircraft, point_trim, wh, time):
 
 ''' Affichages des trajectoires '''
 
-aircraft = dyn.Param_A321()
-wh = 2 #m/s
-time = np.arange(0, 250, 0.1)
 
+def trajectory(XnonLin, XLin):
 
+    fig = plt.figure()
 
-XnonLin = nonLinearModel(aircraft, point_2, wh, time)
-fignonLin = plt.figure()
-dyn.plot(time, XnonLin, figure=fignonLin)
+    dyn.plot(time, XnonLin, figure=fig)
+    dyn.plot(time, XLin, figure=fig)
 
+    figDiff = plt.figure()
+    dyn.plot(time, abs(XLin - XnonLin), figure=figDiff)
 
-
-XLin = LinearModel(aircraft, point_1, wh, time)
-figLin = plt.figure()
-dyn.plot(time, XLin, figure=figLin)
-
-
-
-figDiff = plt.figure()
-dyn.plot(time, abs(XLin - XnonLin), figure=figDiff)
-
+    plt.show()
 
 
 def modal_form(aircraft, point_trim):
@@ -113,9 +98,7 @@ def modal_form(aircraft, point_trim):
     M_inv = np.linalg.inv(M)
     Am_4 = np.diag(valeursp)
     Bm_4 = np.dot(M_inv, B_4)
-    return '{}\n{}'.format(Am_4, Bm_4)
-
-
+    return '{} = {}\n\n{} = {}'.format('Am', Am_4,'Bm', Bm_4)
 
 
 def stability(aircraf, point_trim):
@@ -133,7 +116,6 @@ def stability(aircraf, point_trim):
     return V_reals
 
 
-
 def controllability(aircraf, point_trim):
 
     alt, Ma, sm, km = point_trim
@@ -147,7 +129,6 @@ def controllability(aircraf, point_trim):
     for i in range(3):
         Q[:,2*i:2*(i+1)] = np.dot(np.linalg.matrix_power(A_4, i),B_4)
     return Q
-
 
 
 def function_transfere(aircraft, point_trim):
@@ -184,7 +165,6 @@ def function_transfere(aircraft, point_trim):
     return num, den, valeursp
 
 
-
 def pade_reduction(aircraft, point_trim):
 
     num, den, valeursp = function_transfere(aircraft, point_trim)
@@ -200,7 +180,77 @@ def pade_reduction(aircraft, point_trim):
     return pade_num, pade_den
 
 
+if __name__ == '__main__':
 
-print(function_transfere(aircraft, point_1))
+    # question 1
 
-print(pade_reduction(aircraft, point_1))
+    aircraft = dyn.Param_A321()
+    wh = 2  # m/s
+
+    point = points_trim()[15]
+    time = np.arange(0, 250, 0.1)
+
+    XnonLin = nonLinearModel(aircraft, point, wh, time)
+    XLin = LinearModel(aircraft, point, wh, time)
+
+    fig = trajectory(XnonLin, XLin)
+
+    ''''''''''''
+
+    # question 2
+
+    time = np.arange(0, 10, 0.1)
+
+    XnonLin = nonLinearModel(aircraft, point, wh, time)
+    XLin = LinearModel(aircraft, point, wh, time)
+
+    fig = trajectory(XnonLin, XLin)
+
+    ''''''''''''
+
+    # question 3
+
+    time = np.arange(0, 250, 0.1)
+    point_1 = points_trim()[15]
+    point_2 = points_trim()[14]
+
+    XnonLin = nonLinearModel(aircraft, point_2, wh, time)
+    XLin = LinearModel(aircraft, point_1, wh, time)
+
+    fig = trajectory(XnonLin, XLin)
+
+    ''''''''''''
+
+    # question 4
+
+    point = points_trim()[15]
+    print('{:-^100}\n'.format("Forme modale"))
+    print(modal_form(aircraft, point)+'\n')
+    Q = controllability(aircraft, point)
+    Valeursp_reals = stability(aircraft, point)
+    print("La Matrice de Commandabilité est : \n Q = {}\n".format(Q))
+    print("Les parties réelles des valeurs propres sont : \n {}".format(Valeursp_reals))
+
+
+    ''''''''''''
+
+    # question 5
+
+    num, den, valeursp = function_transfere(aircraft, point)
+    pade_num, pade_den = pade_reduction(aircraft, point)
+    print('\n\n{:-^100}\n'.format("fonction de transfert"))
+
+    num = num[0]
+    a_3, a_2, a_1, a_0 = num
+    b_4, b_3, b_2, b_1, b_0 = den
+    v_1, v_2, v_3, v_4 = valeursp
+    a_1p, a_0p = pade_num
+    b_2p, b_1p, b_0p = pade_den
+
+    print("Le polynome du numérateur est : {}p**3 + {}p**2 + {}p + {}\n".format(a_3, a_2, a_1, a_0))
+    print("Le polynome du dénominateur est : {}p**4 + {}p**3 + {}p**2 + {}p + {}\n".format(b_4, b_3, b_2, b_1, b_0))
+    print("Les valeurs propres sont : {}  {}  {}  {}\n".format(v_1, v_2, v_3, v_4))
+    print("Le polynome du numérateur de l'approximation de Padé est : {}p + {}\n".format(a_1p, a_0p))
+    print("Le polyome du dénominateur de l'approximation de Padé est : {}p**2 + {}p + {}".format(b_2p, b_1p, b_0p))
+
+
